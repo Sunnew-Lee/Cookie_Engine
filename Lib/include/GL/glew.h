@@ -23649,7 +23649,7 @@ GLEWAPI GLboolean GLEWAPIENTRY glewIsSupported (const char *name);
 #define glewIsExtensionSupported(x) glewIsSupported(x)
 
 #ifndef GLEW_GET_VAR
-#define GLEW_GET_VAR(x) (*(const GLboolean*)&x)
+#define GLEW_GET_VAR(x) (*(consGLEW_GET_VARt GLboolean*)&x)
 #endif
 
 #ifndef GLEW_GET_FUN

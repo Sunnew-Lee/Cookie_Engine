@@ -4,6 +4,9 @@
 
 class Application : public Graphics::Engine
 {
+public:
 	Application();
+	~Application();
+	//void Run();
 };
 

@@ -1,10 +1,15 @@
 #pragma once
 #include "EngineCore.h"
 
+#include <string>
+
+class GLFWwindow;
+class Scene;
+class Camera;
 
 namespace Graphics
 {
-    class Application;
+    //class Application;
 
     class Engine_API Engine
     {
@@ -12,15 +17,29 @@ namespace Graphics
         Engine();
         ~Engine();
 
-        void Run();
+        virtual void Run();
+
+        // 레벨 추가 함수.
+        void AddScene(Scene* new_scene);
 
     private:
-        Application* m_Application;
-        bool m_IsRunning = true;
-        // Window* m_Window;
-        // ... 기타 서브시스템
+        void Engine_Init();
+        bool GLFW_Init(std::string);
 
-        static Engine* instance;
+        void Update(double delta_time);
+        void Render();
+        void CleanUp();
+
+        double Update_Time(double fps_calc_interval);
+
+    private:
+        static constexpr int WINDOW_WIDTH = 1080;
+        static constexpr int WINDOW_HEIGHT = 720;
+        GLFWwindow* ptr_window{ nullptr };
+        Camera* camera{ nullptr };
+
+        Scene* main_scene{ nullptr };
+
+        inline static Engine* instance = nullptr;
     };
 };
-

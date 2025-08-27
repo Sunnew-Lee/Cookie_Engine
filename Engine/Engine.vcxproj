@@ -43,26 +43,40 @@
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
   </ImportGroup>
   <PropertyGroup Label="UserMacros" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <OutDir>$(SolutionDir)Bin\$(Platform)\$(Configuration)\$(ProjectName)\</OutDir>
+    <IntDir>$(SolutionDir)Intermediate\$(Platform)\$(Configuration)\$(ProjectName)\</IntDir>
+  </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <ClCompile>
       <WarningLevel>Level4</WarningLevel>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BuildEngineDLL;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BuildEngineDLL;GLM_FORCE_SILENT_WARNINGS;_DEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Core;$(SolutionDir)Lib\include;$(SolutionDir)assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;imgui.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\lib\</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy *.h ..\Includes /y /e 
+      <Command>xcopy/y/e *.h ..\Includes
 
-xcopy ..\Assets $(OutDir)..\3Dmodels\ /y /e
+xcopy/y/e ..\3Dmodels $(OutDir)..\3Dmodels\
 
-xcopy ..\Assets $(OutDir)..\Shaders\ /y /e</Command>
+xcopy/y/e ..\Shaders $(OutDir)..\Shaders\</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy/y $(OutDir)\Engine.lib ..\Lib\Engine\
+xcopy/y $(OutDir)\Engine.dll ..\Lib\Engine\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <ClCompile>
@@ -70,31 +84,45 @@ xcopy ..\Assets $(OutDir)..\Shaders\ /y /e</Command>
       <FunctionLevelLinking>true</FunctionLevelLinking>
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
-      <PreprocessorDefinitions>BuildEngineDLL;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>BuildEngineDLL;GLM_FORCE_SILENT_WARNINGS;NDEBUG;_CONSOLE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <AdditionalIncludeDirectories>$(ProjectDir)\;</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(ProjectDir)Core;$(SolutionDir)Lib\include;$(SolutionDir)assimp;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>opengl32.lib;glew32.lib;glfw3dll.lib;imgui.lib;assimp-vc142-mtd.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Lib\lib\</AdditionalLibraryDirectories>
     </Link>
     <PreBuildEvent>
-      <Command>xcopy *.h ..\Includes /y /e 
+      <Command>xcopy/y/e *.h ..\Includes
 
-xcopy ..\Assets $(OutDir)..\3Dmodels\ /y /e
+xcopy/y/e ..\3Dmodels $(OutDir)..\3Dmodels\
 
-xcopy ..\Assets $(OutDir)..\Shaders\ /y /e</Command>
+xcopy/y/e ..\Shaders $(OutDir)..\Shaders\</Command>
     </PreBuildEvent>
+    <PostBuildEvent>
+      <Command>xcopy/y $(OutDir)\Engine.lib ..\Lib\Engine\
+xcopy/y $(OutDir)\Engine.dll ..\Lib\Engine\</Command>
+    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClInclude Include="Core\Application.h" />
+    <ClInclude Include="Camera\Camera.h" />
     <ClInclude Include="Core\EngineCore.h" />
     <ClInclude Include="Core\Engine.h" />
+    <ClInclude Include="Shader\glslShader.h" />
+    <ClInclude Include="Math\Math.h" />
+    <ClInclude Include="Geometry\Mesh.h" />
+    <ClInclude Include="Geometry\Model.h" />
+    <ClInclude Include="Scene\Scene.h" />
   </ItemGroup>
   <ItemGroup>
-    <ClCompile Include="Core\Application.cpp" />
     <ClCompile Include="Core\Engine.cpp" />
+    <ClCompile Include="Geometry\Mesh.cpp" />
+    <ClCompile Include="Geometry\Model.cpp" />
+    <ClCompile Include="Shader\glslShader.cpp" />
+    <ClCompile Include="Scene\Scene.cpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
