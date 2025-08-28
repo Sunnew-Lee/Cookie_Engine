@@ -15,7 +15,7 @@ Creation date: 09.17.2022
 
 Mesh::Mesh(std::string path)
 {
-    readOBJ(path);
+    OBJ_Parser(path);
     calc_BufferDatas();
     SendVertexData();
 }
@@ -34,11 +34,10 @@ void Mesh::vert_mapping(float(*xyz_minmax)[2])
 
     float scale_factor = std::max({ W, H, D });
 
-    OBJ_Translate = glm::translate(glm::mat4(1.0f), -center);
-    OBJ_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
+    MODEL_Translate = glm::translate(glm::mat4(1.0f), -center);
+    MODEL_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
 
-    mapping = OBJ_Scale * OBJ_Translate;
-
+    mapping = MODEL_Scale * MODEL_Translate;
 }
 
 void Mesh::calc_vert_normal()
@@ -56,7 +55,6 @@ void Mesh::calc_vert_normal()
             result += a;
         }
         vertexBuffer[i].nrm = glm::normalize(result);
-
     }
 }
 
@@ -145,7 +143,7 @@ void Mesh::LineVertexData()
     glBindVertexArray(0);
 }
 
-void Mesh::readOBJ(const std::filesystem::path& fileName)
+void Mesh::OBJ_Parser(const std::filesystem::path& fileName)
 {
     if (fileName.extension() != ".obj") {
         throw std::runtime_error("Bad Filetype.  " + fileName.generic_string() + " not a .obj file");
@@ -406,7 +404,7 @@ void Mesh::calc_BufferDatas()
     for (Vertex& v : vertexBuffer)
     {
         vnBuffer.push_back(v.pos);
-        Vec4 temp = Vec4(glm::normalize(v.nrm), 1.f) / OBJ_Scale;
+        Vec4 temp = Vec4(glm::normalize(v.nrm), 1.f) / MODEL_Scale;
 
         vnBuffer.push_back(v.pos + Vec3(temp) * LINE_SCALE);
     }
@@ -416,64 +414,6 @@ void Mesh::calc_BufferDatas()
     for (int i{ 1 }; i < size; i += 2)
     {
         Vec4 temp = Vec4(fnBuffer[i] - fnBuffer[i - 1], 1.f);
-        fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp / OBJ_Scale) * LINE_SCALE;
+        fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp / MODEL_Scale) * LINE_SCALE;
     }
-}
-
-///////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-
-Mesh* CreateSphere(int stacks, int slices)
-{
-    Mesh* mesh = new Mesh();
-
-    for (int i = 0; i <= stacks; i++)
-    {
-        float row = static_cast<float>(i) / stacks;
-        float beta = glm::pi<float>() * (row - 0.5f);
-        for (int j = 0; j <= slices; j++)
-        {
-            Vertex vertex;
-            float col = static_cast<float>(j) / slices;
-            vertex.uv.x = -col;
-            vertex.uv.y = -row;
-
-            float alpha = col * glm::pi<float>() * 2.0f;
-            vertex.pos.x = sin(alpha) * cos(beta);
-            vertex.pos.y = sin(beta);
-            vertex.pos.z = cos(alpha) * cos(beta);
-
-            vertex.nrm.x = vertex.pos.x;
-            vertex.nrm.y = vertex.pos.y;
-            vertex.nrm.z = vertex.pos.z;
-            //vertex.nrm /= radius;
-
-            mesh->vertexBuffer.push_back(vertex);
-        }
-    }
-    mesh->BuildIndexBuffer(stacks, slices);
-    mesh->calc_BufferDatas();
-    mesh->SendVertexData();
-
-    return mesh;
-}
-
-Mesh* CreateOrbit(float radius, GLuint vert)
-{
-    Mesh* mesh = new Mesh();
-    float angle = 360.f / vert;
-
-    mesh->lineposBuffer.push_back(glm::vec3(radius * glm::cos(0.f), 0.f, radius * glm::sin(0.f)));
-
-    for (GLuint i{ 1 }; i < vert; i++)
-    {
-        glm::vec3 pos = glm::vec3(radius * glm::cos(glm::radians(angle * i)), 0.f, radius * glm::sin(glm::radians(angle * i)));
-        mesh->lineposBuffer.push_back(pos);
-        mesh->lineposBuffer.push_back(pos);
-    }
-
-    mesh->lineposBuffer.push_back(mesh->lineposBuffer[0]);
-    mesh->LineVertexData();
-
-    return mesh;
 }

@@ -26,7 +26,6 @@ Creation date: 09.17.2022
 #include "../Math/Math.h"
 #include "../Core/EngineCore.h"
 
-
 #include <map>
 #include "../Shader/glslShader.h"
 
@@ -34,6 +33,48 @@ struct Engine_API Mesh
 {
     Mesh() {};
     Mesh(std::string path);
+
+    void SendVertexData();
+    void UpdateVertexData();
+
+    /*
+    * These three functions for Parsing data out of .obj files.
+    * Do not use if using Assimp.
+    */
+    //===============================================================
+    // read vertex data from .obj file and make face normals.
+    void OBJ_Parser(const std::filesystem::path& fileName);
+
+    // set Model Translate, Scale, mapping from AABB data
+    void vert_mapping(float (*xyz_minmax)[2]);
+
+    // make vert normals out of face normals.
+    void calc_vert_normal();
+    //===============================================================
+
+    void setup_mesh(GLSLShader& shdr);
+
+    void cleanup();
+
+    void BuildIndexBuffer(int stacks, int slices);
+    bool DegenerateTri(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2);
+
+    void calc_BufferDatas();
+    void LineVertexData();
+
+
+    glm::mat4 Get_mapping(void)
+    {
+        return mapping;
+    }
+    glm::mat4 Get_OBJ_Translate(void)
+    {
+        return MODEL_Translate;
+    }
+    glm::mat4 Get_OBJ_Scale(void)
+    {
+        return MODEL_Scale;
+    }
 
     /*  Storing the actual vertex/index data */
     std::vector<Vertex> vertexBuffer;
@@ -53,37 +94,6 @@ struct Engine_API Mesh
     GLuint EBO = 0;
 
     glm::mat4 mapping{ glm::mat4(1.f) };
-    glm::mat4 OBJ_Translate{ glm::mat4(1.f) };
-    glm::mat4 OBJ_Scale{ glm::mat4(1.f) };
-
-    void SendVertexData();
-    void UpdateVertexData();
-    void readOBJ(const std::filesystem::path& fileName);
-    void vert_mapping(float (*xyz_minmax)[2]);
-    void setup_mesh(GLSLShader& shdr);
-    void calc_vert_normal();
-
-    void cleanup();
-
-    void BuildIndexBuffer(int stacks, int slices);
-    bool DegenerateTri(const glm::vec3& v0, const glm::vec3& v1, const glm::vec3& v2);
-
-    void calc_BufferDatas();
-    void LineVertexData();
-
-    glm::mat4 Get_mapping(void)
-    {
-        return mapping;
-    }
-    glm::mat4 Get_OBJ_Translate(void)
-    {
-        return OBJ_Translate;
-    }
-    glm::mat4 Get_OBJ_Scale(void)
-    {
-        return OBJ_Scale;
-    }
+    glm::mat4 MODEL_Translate{ glm::mat4(1.f) };
+    glm::mat4 MODEL_Scale{ glm::mat4(1.f) };
 };
-
-Mesh* CreateSphere(int stacks, int slices);
-Mesh* CreateOrbit(float radius, GLuint vert);

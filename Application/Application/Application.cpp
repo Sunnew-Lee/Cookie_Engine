@@ -1,10 +1,13 @@
 #include "Application.h"
 #include "../Scene/Demo.h"
-//#include "Scene/Scene.h"
+
+#include <imgui.h>
 
 Application::Application()
 {
-	//AddScene(new ApplicationScene());
+	// need to use Engine initalized ImGui
+	ImGui::SetCurrentContext(Graphics::Engine::Gui);
+
 	AddScene(new Demo);
 }
 

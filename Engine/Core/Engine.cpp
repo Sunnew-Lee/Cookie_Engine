@@ -14,11 +14,10 @@ namespace Graphics
 {
     Engine::Engine()
     {
-        std::cout << "Engine Core Initialized" << std::endl;
+		instance = this;
         // GLFW, OpenGL 초기화 등...
+        std::cout << "Engine Core Initialized" << std::endl;
 		Engine_Init();
-
-        // 사용자가 정의한 Application을 생성합니다.
     }
 
     Engine::~Engine()
@@ -48,8 +47,9 @@ namespace Graphics
 
 		// Setup Main Scene
 		if (main_scene)
-		{
-			main_scene->Init(WINDOW_WIDTH, WINDOW_HEIGHT, camera);
+		{	
+			//todo: camera?
+			main_scene->Init(WINDOW_WIDTH, WINDOW_HEIGHT);
 		}
 	}
     void Engine::Engine_Init()
@@ -72,6 +72,8 @@ namespace Graphics
 		const char* glsl_version = "#version 450";
 		ImGui_ImplOpenGL3_Init(glsl_version);
 		ImGui::StyleColorsDark();
+
+		Gui = ImGui::GetCurrentContext();
     }
 
     bool Engine::GLFW_Init(std::string title)
@@ -191,13 +193,13 @@ namespace Graphics
 	}
 	void Engine::CleanUp()
 	{
-		//main_scene.cleanup();
 		if (main_scene)
 		{
-			main_scene->cleanup();
+			main_scene->CleanUp();
 		}
 		SafeDelete(main_scene);
-		SafeDelete(ptr_window);
+
+
 		SafeDelete(camera);
 
 		ImGui_ImplOpenGL3_Shutdown();
@@ -205,6 +207,8 @@ namespace Graphics
 		ImGui::DestroyContext();
 		glfwTerminate();
 	}
+
+	//todo: need to refactor function. not using param
 	double Engine::Update_Time(double fps_calc_interval)
 	{
 		// get elapsed time (in seconds) between previous and current frames

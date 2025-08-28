@@ -75,5 +75,4 @@ private:
     bool is_updated{ false };
 	
     Mesh* mesh;
-
 };

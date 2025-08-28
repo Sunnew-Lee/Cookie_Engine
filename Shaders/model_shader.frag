@@ -47,7 +47,7 @@ void main(void)
 
     if(color.a > 0.f)
     {
-        outColor = vec4( ( ambient + diffuse  ) * color.xyz, 1.0);    //+ specular
+        outColor = vec4( ( ambient + diffuse + specular  ) * color.xyz, 1.0);    //+ specular
     }
     else
     {

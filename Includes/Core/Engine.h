@@ -3,9 +3,10 @@
 
 #include <string>
 
-class GLFWwindow;
+struct GLFWwindow;
 class Scene;
 class Camera;
+struct ImGuiContext;
 
 namespace Graphics
 {
@@ -17,10 +18,13 @@ namespace Graphics
         Engine();
         ~Engine();
 
-        virtual void Run();
+        void Run();
 
         // 레벨 추가 함수.
         void AddScene(Scene* new_scene);
+
+    protected:
+        ImGuiContext* Gui{ nullptr };
 
     private:
         void Engine_Init();

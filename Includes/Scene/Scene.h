@@ -13,33 +13,11 @@ Author: Sunwoo Lee / sunwoo.lee / 0055087
 Creation date: 09.17.2022
 --------------------------------------------------------*/
 #pragma once
-//#include <object.h>
 #include "../Math/Math.h"
 #include "../Core/EngineCore.h"
 
 #include "../Geometry/Model.h"
 
-enum class MeshType
-{
-	BUNNY,
-	SPHERE4,
-	CUBE2,
-	SPHERE,
-	SPHERE_MOD,
-	//CUP,
-	//LUCY,
-	//STARWARS,
-	PROCEDURAL_SPHERE,
-	ORBIT,
-	COUNT
-};
-
-enum class ShdrType
-{
-	MODEL_PHONG,
-	LINE,
-	COUNT
-};
 
 //using shdr_vec = std::vector<std::pair<GLenum, std::string>>;
 class Camera;
@@ -47,44 +25,26 @@ class Camera;
 class Engine_API Scene
 {
 public:
-	Scene() {};
-	~Scene() {};
+	Scene() = default;
+	virtual ~Scene() = default;
 
-	void Init(int w, int h, Camera* camera);
-	void Update(double delta_time);
-	void Render();
-	void cleanup();
+	virtual void Init(int w, int h) = 0;
+	virtual void mesh_setup()=0;
+	virtual void shdr_file_setup()=0;
 
-private:
-	void mesh_setup();
-	void shdr_file_setup();
+	virtual void Update(double delta_time) = 0;
+
+	virtual void Render() = 0;
+
+	virtual void CleanUp();
+protected:
 
 	glm::mat4 view{ glm::mat4(1.0f) };
 	glm::mat4 projection{ glm::mat4(1.0f) };
-	Vec3 lightPos{ -5.f, 3.f, 5.f };
-
-	static constexpr int SATELLITE_NUM{ 8 };
-	static constexpr int ORBIT_VERT{ 100 };
-	static constexpr float RAD = 3.f;
-	static constexpr float ANGLE = 360.f / SATELLITE_NUM;
+	//Vec3 lightPos{ -5.f, 3.f, 5.f };
 
 	std::vector<shdr_vec> shdr_files;
 	std::vector<Mesh*> meshes;
 
-	Model CenterOBJ;
-	//Model Satellites[SATELLITE_NUM];
-
-	//Model Orbit;
-
-	bool show_fnormal{ false };
-	bool show_vnormal{ false };
-
-	static constexpr int ITEM_NUM = 5;
-	const char* mesh_items[ITEM_NUM]
-	{
-		"BUNNY","SPHERE4","CUBE2","SPHERE","SPHERE_MOD"
-	};
-	int selected_item{ 0 };
-
-	Camera* camera;
+	Camera* camera{ nullptr };
 };
