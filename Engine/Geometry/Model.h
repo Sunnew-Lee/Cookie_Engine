@@ -27,7 +27,7 @@ public:
     void init(Mesh* m, shdr_vec& shdr_files);
     void update(double dt, Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolor, Vec3& eye);
     void draw(bool show_fnormal = { false }, bool show_vnormal = { false });
-    void draw_orbit();
+    //void draw_orbit();
     void cleanup();
 
     void set_color(Vec4 color) 
@@ -74,4 +74,5 @@ private:
     bool is_updated{ false };
 	
     Mesh* mesh;
+    //std::vector<Mesh*> meshes;
 };

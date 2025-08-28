@@ -18,6 +18,10 @@ namespace Graphics
         // GLFW, OpenGL 초기화 등...
         std::cout << "Engine Core Initialized" << std::endl;
 		Engine_Init();
+
+		// Setup Camera
+		//camera = new Camera(Vec3(1338.f, 45000.f, 136532.f));	//todo: glm::vec3 is better than Math include?
+		camera = new Camera(Vec3(0.0f, 0.0f, 1000.f));	//todo: glm::vec3 is better than Math include?
     }
 
     Engine::~Engine()
@@ -60,9 +64,6 @@ namespace Graphics
             std::cout << "Unable to create OpenGL context" << std::endl;
             std::exit(EXIT_FAILURE);
         }
-
-		// Setup Camera
-		camera = new Camera(Vec3(0.0f, 3.0f, 10.f));	//todo: glm::vec3 is better than Math include?
 		
 		// Setup ImGui context
 		IMGUI_CHECKVERSION();

@@ -398,6 +398,7 @@ bool Mesh::DegenerateTri(const glm::vec3& v0, const glm::vec3& v1, const glm::ve
         glm::distance(v2, v0) < EPSILON);
 }
 
+//todo: mapping delete
 void Mesh::calc_BufferDatas()
 {
     //calc vnBuffer

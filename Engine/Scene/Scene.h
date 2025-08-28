@@ -36,14 +36,14 @@ public:
 
 	virtual void Render() = 0;
 
-	inline virtual void CleanUp()
-	{
-		for (Mesh* mesh : meshes)
-		{
-			mesh->cleanup();
-			delete mesh;
-		}
-	}
+	virtual void CleanUp() = 0;
+	//{
+	//	for (Mesh* mesh : meshes)
+	//	{
+	//		mesh->cleanup();
+	//		delete mesh;
+	//	}
+	//}
 
 protected:
 
@@ -52,10 +52,9 @@ protected:
 	//Vec3 lightPos{ -5.f, 3.f, 5.f };
 
 	Vec3 cam_pos{ 0.f,0.f,0.f };
-	Vec2 Z_near_far{ 0.1f, 100.f };
+	Vec2 Z_near_far{ 0.1f, 10000000.f };
 
-	std::vector<shdr_vec> shdr_files;
-	std::vector<Mesh*> meshes;
+	std::vector<GLSLShader> shdr_files;
 
 	Camera* camera{ nullptr };
 };

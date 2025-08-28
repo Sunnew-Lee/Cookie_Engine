@@ -8,12 +8,23 @@ Purpose:
     Please see the class declaration for information about these functions.
 Language: C++ 17
 Platform: VS 19 / version 16.9.0 / Windows
-Project: sunwoo.lee_CS300_1
+Project: sunwoo.lee_CS300_2
 Author: pghali@digipen.edu
 Modified by: Sunwoo Lee / sunwoo.lee / 0055087
 Modified date: 09.17.2022
 --------------------------------------------------------*/
-#include "glslshader.h"
+#include "glslShader.h"
+
+
+GLSLShader::GLSLShader(std::vector<std::pair<GLenum, std::string>> shdr_files)
+{
+    CompileLinkValidate(shdr_files);
+    if (GL_FALSE == IsLinked()) {
+        std::cout << "Unable to compile/link/validate shader programs: " << "\n";
+        std::cout << GetLog() << std::endl;
+        std::exit(EXIT_FAILURE);
+    }
+}
 
 GLint
 GLSLShader::GetUniformLocation(GLchar const* name) {
@@ -125,6 +136,7 @@ GLSLShader::CompileShaderFromString(GLenum shader_type,
     }
     else { // attach the shader to the program object
         glAttachShader(pgm_handle, shader_handle);
+        //glDeleteShader(shader_handle);
         return GL_TRUE;
     }
 }

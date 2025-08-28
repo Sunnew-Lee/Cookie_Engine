@@ -99,18 +99,18 @@ void Model::draw(bool show_fnormal, bool show_vnormal)
     shdr_pgm.UnUse();
 }
 
-void Model::draw_orbit()
-{
-    shdr_pgm.Use();
-
-    glBindVertexArray(mesh->VAO);
-
-    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(mesh->lineposBuffer.size()));
-
-    glBindVertexArray(0);
-
-    shdr_pgm.UnUse();
-}
+//void Model::draw_orbit()
+//{
+//    shdr_pgm.Use();
+//
+//    glBindVertexArray(mesh->VAO);
+//
+//    glDrawArrays(GL_LINES, 0, static_cast<GLsizei>(mesh->lineposBuffer.size()));
+//
+//    glBindVertexArray(0);
+//
+//    shdr_pgm.UnUse();
+//}
 
 void Model::cleanup()
 {

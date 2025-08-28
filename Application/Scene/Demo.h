@@ -39,6 +39,8 @@ public:
 
 private:
 	void Update_ImGui();
+	void Parse_Section();
+	std::vector<std::vector<std::string>> sections;
 private:
 	Vec3 lightPos{ -5.f, 3.f, 5.f };
 	Vec3 lightColor{ 0.08f, 0.34f, 0.97f };
@@ -47,13 +49,6 @@ private:
 
 	bool show_fnormal{ false };
 	bool show_vnormal{ false };
-
-	static constexpr int ITEM_NUM = 5;
-	const char* mesh_items[ITEM_NUM]
-	{
-		"BUNNY","SPHERE4","CUBE2","SPHERE","SPHERE_MOD"
-	};
-	int selected_item{ 0 };
 };
 
 //Mesh* CreateSphere(int stacks, int slices);
