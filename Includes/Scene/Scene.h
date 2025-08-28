@@ -28,7 +28,7 @@ public:
 	Scene() = default;
 	virtual ~Scene() = default;
 
-	virtual void Init(int w, int h) = 0;
+	virtual void Init(int w, int h, Camera* cam) = 0;
 	virtual void mesh_setup()=0;
 	virtual void shdr_file_setup()=0;
 
@@ -36,12 +36,23 @@ public:
 
 	virtual void Render() = 0;
 
-	virtual void CleanUp();
+	inline virtual void CleanUp()
+	{
+		for (Mesh* mesh : meshes)
+		{
+			mesh->cleanup();
+			delete mesh;
+		}
+	}
+
 protected:
 
 	glm::mat4 view{ glm::mat4(1.0f) };
 	glm::mat4 projection{ glm::mat4(1.0f) };
 	//Vec3 lightPos{ -5.f, 3.f, 5.f };
+
+	Vec3 cam_pos{ 0.f,0.f,0.f };
+	Vec2 Z_near_far{ 0.1f, 100.f };
 
 	std::vector<shdr_vec> shdr_files;
 	std::vector<Mesh*> meshes;

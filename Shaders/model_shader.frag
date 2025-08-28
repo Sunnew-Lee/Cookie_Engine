@@ -13,8 +13,8 @@ Creation date: 08.26.2025
 
 
 uniform vec3 light_pos;
-uniform vec3 light_color = vec3(1.0, 1.0, 1.0);
-uniform vec3 viewPos = vec3(0.0, 0.0, 10.0);
+uniform vec3 light_color;
+uniform vec3 viewPos;
 
 uniform vec4 color;
 uniform sampler2D tex;
@@ -28,26 +28,32 @@ out vec4 outColor;
 void main(void)
 {
     // ambient
-    float ambientStrength = 0.1;
-    vec3 ambient = ambientStrength * light_color;
+    //float ambientStrength = 0.1;
+    //vec3 ambient = ambientStrength * light_color;
 
     // diffuse
     vec3 norm = normalize(NRM);
-    vec3 lightDir = normalize(light_pos - frag_pos);
-    float diff = max(dot(norm,lightDir),0.);//brightness
-    vec3 diffuse = diff * light_color;
+    vec3 lightDir = normalize(light_pos);
+    float diff = max(dot(norm,lightDir),0.);    //brightness
+    //vec3 diffuse = diff * light_color;
 
     // specular
-    float specularStrength = 0.5;
+    //float specularStrength = 0.5;
     vec3 viewDir = normalize(viewPos - frag_pos);
-    vec3 reflectDir = reflect(-lightDir, norm);  
+    //vec3 reflectDir = reflect(-lightDir, norm);  
+
+    vec3 reflectDir = 2.f * dot(lightDir, norm) * norm - (lightDir);
     float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
-    vec3 specular = specularStrength * spec * light_color;  
+    //vec3 specular = specularStrength * spec * light_color;  
 
 
     if(color.a > 0.f)
     {
-        outColor = vec4( ( ambient + diffuse + specular  ) * color.xyz, 1.0);    //+ specular
+        vec3 ambient =  color.xyz;         
+        vec3 diffuse =   diff * light_color;
+        vec3 specular =  spec * light_color;
+
+        outColor = vec4( ( ambient + diffuse + specular ), 1.0);    //+ specular
     }
     else
     {
@@ -56,3 +62,37 @@ void main(void)
     
     //outColor = vec4( normalize(NRM), 1.0 );
 }
+
+
+
+//void main(void)
+//{
+//    // ambient
+//    float ambientStrength = 0.1;
+//    vec3 ambient = ambientStrength * light_color;
+//
+//    // diffuse
+//    vec3 norm = normalize(NRM);
+//    vec3 lightDir = normalize(light_pos - frag_pos);
+//    float diff = max(dot(norm,lightDir),0.);//brightness
+//    vec3 diffuse = diff * light_color;
+//
+//    // specular
+//    float specularStrength = 0.5;
+//    vec3 viewDir = normalize(viewPos - frag_pos);
+//    vec3 reflectDir = reflect(-lightDir, norm);  
+//    float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32);
+//    vec3 specular = specularStrength * spec * light_color;  
+//
+//
+//    if(color.a > 0.f)
+//    {
+//        outColor = vec4( ( ambient + diffuse + specular  ) * color.xyz, 1.0);    //+ specular
+//    }
+//    else
+//    {
+//        outColor = vec4(color.xyz, 1.0);
+//    }
+//    
+//    //outColor = vec4( normalize(NRM), 1.0 );
+//}

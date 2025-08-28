@@ -11,8 +11,6 @@ enum class MeshType
 	//CUP,
 	//LUCY,
 	//STARWARS,
-	PROCEDURAL_SPHERE,
-	ORBIT,
 	COUNT
 };
 
@@ -29,7 +27,7 @@ public:
 	Demo() {};
 	virtual ~Demo() override {};
 
-	virtual void Init(int w, int h) override;
+	virtual void Init(int w, int h, Camera* cam) override;
 	virtual void mesh_setup() override;
 	virtual void shdr_file_setup() override;
 
@@ -38,18 +36,14 @@ public:
 	virtual void Render() override;
 
 	virtual void CleanUp() override;
+
 private:
-
+	void Update_ImGui();
+private:
 	Vec3 lightPos{ -5.f, 3.f, 5.f };
-
-	static constexpr int SATELLITE_NUM{ 8 };
-	static constexpr int ORBIT_VERT{ 100 };
-	static constexpr float RAD = 3.f;
-	static constexpr float ANGLE = 360.f / SATELLITE_NUM;
+	Vec3 lightColor{ 0.08f, 0.34f, 0.97f };
 
 	Model CenterOBJ;
-	Model Satellites[SATELLITE_NUM];
-	Model Orbit;
 
 	bool show_fnormal{ false };
 	bool show_vnormal{ false };
@@ -62,5 +56,5 @@ private:
 	int selected_item{ 0 };
 };
 
-Mesh* CreateSphere(int stacks, int slices);
-Mesh* CreateOrbit(float radius, GLuint vert);
+//Mesh* CreateSphere(int stacks, int slices);
+//Mesh* CreateOrbit(float radius, GLuint vert);

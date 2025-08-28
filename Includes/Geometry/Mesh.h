@@ -46,7 +46,7 @@ struct Engine_API Mesh
     void OBJ_Parser(const std::filesystem::path& fileName);
 
     // set Model Translate, Scale, mapping from AABB data
-    void vert_mapping(float (*xyz_minmax)[2]);
+    //void vert_mapping(float (*xyz_minmax)[2]);
 
     // make vert normals out of face normals.
     void calc_vert_normal();
@@ -63,7 +63,7 @@ struct Engine_API Mesh
     void LineVertexData();
 
 
-    glm::mat4 Get_mapping(void)
+    /*glm::mat4 Get_mapping(void)
     {
         return mapping;
     }
@@ -74,7 +74,7 @@ struct Engine_API Mesh
     glm::mat4 Get_OBJ_Scale(void)
     {
         return MODEL_Scale;
-    }
+    }*/
 
     /*  Storing the actual vertex/index data */
     std::vector<Vertex> vertexBuffer;
@@ -93,7 +93,7 @@ struct Engine_API Mesh
     GLuint VAO = 0;
     GLuint EBO = 0;
 
-    glm::mat4 mapping{ glm::mat4(1.f) };
-    glm::mat4 MODEL_Translate{ glm::mat4(1.f) };
-    glm::mat4 MODEL_Scale{ glm::mat4(1.f) };
+    //glm::mat4 mapping{ glm::mat4(1.f) };
+    /*glm::mat4 MODEL_Translate{ glm::mat4(1.f) };
+    glm::mat4 MODEL_Scale{ glm::mat4(1.f) };*/
 };

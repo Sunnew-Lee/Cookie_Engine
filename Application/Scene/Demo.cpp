@@ -1,106 +1,72 @@
 #include "Demo.h"
+#include "../Camera/Camera.h"
 
 #include <imgui.h>
 
 //todo: where do we need to make camera?
-void Demo::Init(int width, int height)
+void Demo::Init(int width, int height, Camera* cam)
 {
+	camera = cam;
+
 	glViewport(0, 0, width, height);
-	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, 0.1f, 100.0f);
-	//view = glm::translate(view, glm::vec3(0.0f, 0.0f, 10.0f));
-	view = glm::lookAt(glm::vec3(0.0f, 3.0f, 7.50f),
-		glm::vec3(0.0f, 0.0f, 0.0f),
-		glm::vec3(0.0f, 1.0f, 0.0f));
+	projection = glm::perspective(glm::radians(45.0f), (float)width / (float)height, Z_near_far.x, Z_near_far.y);
+	view = camera->GetViewMatrix();
 
 	shdr_file_setup();
 
 	mesh_setup();
 
 	CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]);
-	CenterOBJ.set_color({ 0.75f,0.45f,0.3f,1.f });
-
-	for (int i{ 0 }; i < SATELLITE_NUM; i++)
-	{
-		Satellites[i].init(meshes[static_cast<int>(MeshType::PROCEDURAL_SPHERE)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]);
-		Satellites[i].set_position(glm::vec3(RAD * glm::cos(glm::radians(ANGLE * i)), 0.f, RAD * glm::sin(glm::radians(ANGLE * i))));
-		Satellites[i].set_scale({ 0.1f,0.1f ,0.1f });
-
-		if (i % 2 == 0)
-		{
-			Satellites[i].set_color({ 0.8f,0.25f,0.25f, 1.f });
-		}
-		else
-		{
-			Satellites[i].set_color({ 0.25f,0.25f,0.8f, 1.f });
-		}
-	}
-
-	Orbit.init(meshes[static_cast<int>(MeshType::ORBIT)], shdr_files[static_cast<int>(ShdrType::LINE)]);
-	Orbit.set_color(glm::vec4(1.f));
+	//CenterOBJ.set_color({ 0.75f,0.45f,0.3f,1.f });
+	CenterOBJ.set_color({ 0.f,0.f,0.f,1.f });
 }
 
 void Demo::Update(double delta_time)
 {
-	{
-		ImGui::Begin("Scene");
-		if (ImGui::Combo("Mesh", &selected_item, mesh_items, IM_ARRAYSIZE(mesh_items)))
-		{
-			switch (selected_item)
-			{
-			case 0:CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-			case 1:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE4)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-			case 2:CenterOBJ.init(meshes[static_cast<int>(MeshType::CUBE2)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-			case 3:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-			case 4:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE_MOD)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+	Update_ImGui();	
 
-			default: CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-			}
-		}
+	view = camera->GetViewMatrix();
+	cam_pos = camera->Position;
 
-		ImGui::Checkbox("Show face normal ", &show_fnormal);
-		ImGui::Checkbox("Show vertex normal", &show_vnormal);
-
-		ImGui::SliderFloat3("Light Position", &lightPos.x, -10.f, 10.f);
-		ImGui::End();
-	}
-
-	CenterOBJ.set_rotation(glm::vec3(0.f, (float)glfwGetTime() * glm::radians(50.0f), 0.f));
-	CenterOBJ.update(delta_time, view, projection, lightPos);
-
-	for (int i{ 0 }; i < SATELLITE_NUM; i++)
-	{
-		Satellites[i].set_position(glm::vec3(3.f * glm::cos(glm::radians(45.0f * i - (float)glfwGetTime() * 20.0)), 0.f, 3.f * glm::sin(glm::radians(45.0f * i - (float)glfwGetTime() * 20.0))));
-		Satellites[i].update(delta_time, view, projection, lightPos);
-	}
-
-	Orbit.update(delta_time, view, projection, lightPos);
+	CenterOBJ.update(delta_time, view, projection, lightPos, lightColor, cam_pos);
+	//CenterOBJ.update(shaders[static_cast<int>(ShdrType::MODEL_PHONG)], view, projection, cam_pos, g, pl, m);
 }
 
 void Demo::Render()
 {
 	CenterOBJ.draw(show_fnormal, show_vnormal);
-
-	for (Model& satellite : Satellites)
-	{
-		satellite.draw();
-	}
-
-	Orbit.draw_orbit();
 }
 
 void Demo::CleanUp()
 {
 	CenterOBJ.cleanup();
 
-	for (Model& satellite : Satellites)
-	{
-		satellite.cleanup();
-	}
-
-	Orbit.cleanup();
-
 	// Clean Meshes
 	Scene::CleanUp();
+}
+
+void Demo::Update_ImGui()
+{
+	ImGui::Begin("Scene");
+	if (ImGui::Combo("Mesh", &selected_item, mesh_items, IM_ARRAYSIZE(mesh_items)))
+	{
+		switch (selected_item)
+		{
+		case 0:CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+		case 1:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE4)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+		case 2:CenterOBJ.init(meshes[static_cast<int>(MeshType::CUBE2)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+		case 3:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+		case 4:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE_MOD)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+
+		default: CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+		}
+	}
+
+	ImGui::Checkbox("Show face normal ", &show_fnormal);
+	ImGui::Checkbox("Show vertex normal", &show_vnormal);
+
+	ImGui::SliderFloat3("Light Position", &lightPos.x, -10.f, 10.f);
+	ImGui::End();
 }
 
 void Demo::mesh_setup()
@@ -120,10 +86,6 @@ void Demo::mesh_setup()
 	meshes.push_back(new Mesh(cube2));
 	meshes.push_back(new Mesh(sphere));
 	meshes.push_back(new Mesh(sphere_mod));
-
-	int stacks{ 50 }, slices{ 50 };
-	meshes.push_back(CreateSphere(stacks, slices));
-	meshes.push_back(CreateOrbit(RAD, ORBIT_VERT));
 }
 
 void Demo::shdr_file_setup()
@@ -141,57 +103,57 @@ void Demo::shdr_file_setup()
 
 //======================================================================================================================================
 
-Mesh* CreateSphere(int stacks, int slices)
-{
-	Mesh* mesh = new Mesh();
-
-	for (int i = 0; i <= stacks; i++)
-	{
-		float row = static_cast<float>(i) / stacks;
-		float beta = glm::pi<float>() * (row - 0.5f);
-		for (int j = 0; j <= slices; j++)
-		{
-			Vertex vertex;
-			float col = static_cast<float>(j) / slices;
-			vertex.uv.x = -col;
-			vertex.uv.y = -row;
-
-			float alpha = col * glm::pi<float>() * 2.0f;
-			vertex.pos.x = sin(alpha) * cos(beta);
-			vertex.pos.y = sin(beta);
-			vertex.pos.z = cos(alpha) * cos(beta);
-
-			vertex.nrm.x = vertex.pos.x;
-			vertex.nrm.y = vertex.pos.y;
-			vertex.nrm.z = vertex.pos.z;
-			//vertex.nrm /= radius;
-
-			mesh->vertexBuffer.push_back(vertex);
-		}
-	}
-	mesh->BuildIndexBuffer(stacks, slices);
-	mesh->calc_BufferDatas();
-	mesh->SendVertexData();
-
-	return mesh;
-}
-
-Mesh* CreateOrbit(float radius, GLuint vert)
-{
-	Mesh* mesh = new Mesh();
-	float angle = 360.f / vert;
-
-	mesh->lineposBuffer.push_back(glm::vec3(radius * glm::cos(0.f), 0.f, radius * glm::sin(0.f)));
-
-	for (GLuint i{ 1 }; i < vert; i++)
-	{
-		glm::vec3 pos = glm::vec3(radius * glm::cos(glm::radians(angle * i)), 0.f, radius * glm::sin(glm::radians(angle * i)));
-		mesh->lineposBuffer.push_back(pos);
-		mesh->lineposBuffer.push_back(pos);
-	}
-
-	mesh->lineposBuffer.push_back(mesh->lineposBuffer[0]);
-	mesh->LineVertexData();
-
-	return mesh;
-}
+//Mesh* CreateSphere(int stacks, int slices)
+//{
+//	Mesh* mesh = new Mesh();
+//
+//	for (int i = 0; i <= stacks; i++)
+//	{
+//		float row = static_cast<float>(i) / stacks;
+//		float beta = glm::pi<float>() * (row - 0.5f);
+//		for (int j = 0; j <= slices; j++)
+//		{
+//			Vertex vertex;
+//			float col = static_cast<float>(j) / slices;
+//			vertex.uv.x = -col;
+//			vertex.uv.y = -row;
+//
+//			float alpha = col * glm::pi<float>() * 2.0f;
+//			vertex.pos.x = sin(alpha) * cos(beta);
+//			vertex.pos.y = sin(beta);
+//			vertex.pos.z = cos(alpha) * cos(beta);
+//
+//			vertex.nrm.x = vertex.pos.x;
+//			vertex.nrm.y = vertex.pos.y;
+//			vertex.nrm.z = vertex.pos.z;
+//			//vertex.nrm /= radius;
+//
+//			mesh->vertexBuffer.push_back(vertex);
+//		}
+//	}
+//	mesh->BuildIndexBuffer(stacks, slices);
+//	mesh->calc_BufferDatas();
+//	mesh->SendVertexData();
+//
+//	return mesh;
+//}
+//
+//Mesh* CreateOrbit(float radius, GLuint vert)
+//{
+//	Mesh* mesh = new Mesh();
+//	float angle = 360.f / vert;
+//
+//	mesh->lineposBuffer.push_back(glm::vec3(radius * glm::cos(0.f), 0.f, radius * glm::sin(0.f)));
+//
+//	for (GLuint i{ 1 }; i < vert; i++)
+//	{
+//		glm::vec3 pos = glm::vec3(radius * glm::cos(glm::radians(angle * i)), 0.f, radius * glm::sin(glm::radians(angle * i)));
+//		mesh->lineposBuffer.push_back(pos);
+//		mesh->lineposBuffer.push_back(pos);
+//	}
+//
+//	mesh->lineposBuffer.push_back(mesh->lineposBuffer[0]);
+//	mesh->LineVertexData();
+//
+//	return mesh;
+//}

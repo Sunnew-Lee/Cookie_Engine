@@ -14,7 +14,7 @@ namespace Graphics
 {
     Engine::Engine()
     {
-		instance = this;
+		//instance = this;
         // GLFW, OpenGL 초기화 등...
         std::cout << "Engine Core Initialized" << std::endl;
 		Engine_Init();
@@ -49,9 +49,10 @@ namespace Graphics
 		if (main_scene)
 		{	
 			//todo: camera?
-			main_scene->Init(WINDOW_WIDTH, WINDOW_HEIGHT);
+			main_scene->Init(WINDOW_WIDTH, WINDOW_HEIGHT, camera);
 		}
 	}
+
     void Engine::Engine_Init()
     {
 		// Setup GLFW
@@ -162,7 +163,9 @@ namespace Graphics
 		ImGui_ImplGlfw_NewFrame();
 		ImGui::NewFrame();
 
+		//camera movement input
 		camera->processInput(ptr_window, delta_time);
+
 		if (main_scene)
 		{
 			main_scene->Update(delta_time);

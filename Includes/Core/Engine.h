@@ -37,13 +37,13 @@ namespace Graphics
         double Update_Time(double fps_calc_interval);
 
     private:
-        static constexpr int WINDOW_WIDTH = 1080;
-        static constexpr int WINDOW_HEIGHT = 720;
+        static constexpr int WINDOW_WIDTH = 1500;
+        static constexpr int WINDOW_HEIGHT = 1000;
         GLFWwindow* ptr_window{ nullptr };
         Camera* camera{ nullptr };
 
         Scene* main_scene{ nullptr };
 
-        inline static Engine* instance = nullptr;
+        //inline static Engine* instance = nullptr;
     };
 };

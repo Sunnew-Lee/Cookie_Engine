@@ -32,11 +32,10 @@ void Model::init(Mesh* m, shdr_vec& shdr_files)
     mesh->setup_mesh(shdr_pgm);
 }
 
-void Model::update(double /*dt*/, Mat4& view, Mat4& projection, Vec3& lightpos)
+//todo: model gets shdr as param?
+void Model::update(double /*dt*/, Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolor, Vec3& eye)
 {
     shdr_pgm.Use();
-
-    //mesh->UpdateVertexData();
 
     if (is_updated == true)
     {
@@ -45,15 +44,19 @@ void Model::update(double /*dt*/, Mat4& view, Mat4& projection, Vec3& lightpos)
         model = glm::rotate(model, rotation.y, glm::vec3(0.0f, 1.0f, 0.0f));
         model = glm::rotate(model, rotation.z, glm::vec3(0.0f, 0.0f, 1.0f));
         model = glm::scale(model, scale);
+        is_updated = false;
     }
 
     glUniformMatrix4fv(glGetUniformLocation(shdr_handle, "model"), 1, GL_FALSE, glm::value_ptr(model));
     glUniformMatrix4fv(glGetUniformLocation(shdr_handle, "projection"), 1, GL_FALSE, glm::value_ptr(projection));
     glUniformMatrix4fv(glGetUniformLocation(shdr_handle, "view"), 1, GL_FALSE, glm::value_ptr(view));
-    glUniformMatrix4fv(glGetUniformLocation(shdr_handle, "mapping"), 1, GL_FALSE, glm::value_ptr(mesh->Get_mapping()));
+    //glUniformMatrix4fv(glGetUniformLocation(shdr_handle, "mapping"), 1, GL_FALSE, glm::value_ptr(mesh->Get_mapping()));
 
-    glUniform3fv(glGetUniformLocation(shdr_handle, "light_pos"), 1, glm::value_ptr(lightpos));
     glUniform4fv(glGetUniformLocation(shdr_handle, "color"), 1, glm::value_ptr(selfColor));
+
+    glUniform3fv(glGetUniformLocation(shdr_handle, "light_color"), 1, glm::value_ptr(lightcolor));
+    glUniform3fv(glGetUniformLocation(shdr_handle, "light_pos"), 1, glm::value_ptr(lightpos));
+    glUniform3fv(glGetUniformLocation(shdr_handle, "viewPos"), 1, glm::value_ptr(eye));
 
     shdr_pgm.UnUse();
 }

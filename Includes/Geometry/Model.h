@@ -25,7 +25,7 @@ public:
 
     Model(Vec3 pos = { 0.f,0.f,0.f }, Vec3 s = { 1.f,1.f,1.f }, Vec3 rot = { 0.f,0.f,0.f }, Vec4 col = { 0.f,0.f,0.f,1.f });
     void init(Mesh* m, shdr_vec& shdr_files);
-    void update(double dt, Mat4& view, Mat4& projection, Vec3& lightpos);
+    void update(double dt, Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolor, Vec3& eye);
     void draw(bool show_fnormal = { false }, bool show_vnormal = { false });
     void draw_orbit();
     void cleanup();
@@ -64,7 +64,6 @@ public:
 private:
     GLSLShader shdr_pgm;
     GLuint shdr_handle{ 0 };
-
 
 	Vec3 position{ 0,0,0 };
 	Vec3 scale{ 1,1,1 };

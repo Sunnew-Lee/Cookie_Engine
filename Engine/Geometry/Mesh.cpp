@@ -20,25 +20,25 @@ Mesh::Mesh(std::string path)
     SendVertexData();
 }
 
-void Mesh::vert_mapping(float(*xyz_minmax)[2])
-{
-    float W = xyz_minmax[0][1] - xyz_minmax[0][0];  //x width
-    float H = xyz_minmax[1][1] - xyz_minmax[1][0];  //y height
-    float D = xyz_minmax[2][1] - xyz_minmax[2][0];  //z depth
-
-    glm::vec3 center{ glm::vec3((xyz_minmax[0][0] + xyz_minmax[0][1]),(xyz_minmax[1][0] + xyz_minmax[1][1]),(xyz_minmax[2][0] + xyz_minmax[2][1])) };
-    center *= 0.5f;
-
-    glm::mat4 T = glm::mat4(1.0f);
-    glm::mat4 S = glm::mat4(1.0f);
-
-    float scale_factor = std::max({ W, H, D });
-
-    MODEL_Translate = glm::translate(glm::mat4(1.0f), -center);
-    MODEL_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
-
-    mapping = MODEL_Scale * MODEL_Translate;
-}
+//void Mesh::vert_mapping(float(*xyz_minmax)[2])
+//{
+//    float W = xyz_minmax[0][1] - xyz_minmax[0][0];  //x width
+//    float H = xyz_minmax[1][1] - xyz_minmax[1][0];  //y height
+//    float D = xyz_minmax[2][1] - xyz_minmax[2][0];  //z depth
+//
+//    glm::vec3 center{ glm::vec3((xyz_minmax[0][0] + xyz_minmax[0][1]),(xyz_minmax[1][0] + xyz_minmax[1][1]),(xyz_minmax[2][0] + xyz_minmax[2][1])) };
+//    center *= 0.5f;
+//
+//    glm::mat4 T = glm::mat4(1.0f);
+//    glm::mat4 S = glm::mat4(1.0f);
+//
+//    float scale_factor = std::max({ W, H, D });
+//
+//    MODEL_Translate = glm::translate(glm::mat4(1.0f), -center);
+//    MODEL_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
+//
+//    mapping = MODEL_Scale * MODEL_Translate;
+//}
 
 void Mesh::calc_vert_normal()
 {
@@ -270,7 +270,7 @@ void Mesh::OBJ_Parser(const std::filesystem::path& fileName)
         }
     }
 
-    vert_mapping(xyz_minmax);
+    //vert_mapping(xyz_minmax);
     calc_vert_normal();
 
 }
@@ -404,7 +404,7 @@ void Mesh::calc_BufferDatas()
     for (Vertex& v : vertexBuffer)
     {
         vnBuffer.push_back(v.pos);
-        Vec4 temp = Vec4(glm::normalize(v.nrm), 1.f) / MODEL_Scale;
+        Vec4 temp = Vec4(glm::normalize(v.nrm), 1.f);// / MODEL_Scale;
 
         vnBuffer.push_back(v.pos + Vec3(temp) * LINE_SCALE);
     }
@@ -414,6 +414,6 @@ void Mesh::calc_BufferDatas()
     for (int i{ 1 }; i < size; i += 2)
     {
         Vec4 temp = Vec4(fnBuffer[i] - fnBuffer[i - 1], 1.f);
-        fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp / MODEL_Scale) * LINE_SCALE;
+        fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp/* / MODEL_Scale*/) * LINE_SCALE;
     }
 }
