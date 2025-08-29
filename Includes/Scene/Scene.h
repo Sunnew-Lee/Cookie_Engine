@@ -17,6 +17,7 @@ Creation date: 09.17.2022
 #include "../Core/EngineCore.h"
 
 #include "../Geometry/Model.h"
+#include "../Shader/glslShader.h"
 
 
 //using shdr_vec = std::vector<std::pair<GLenum, std::string>>;
@@ -30,13 +31,20 @@ public:
 
 	virtual void Init(int w, int h, Camera* cam) = 0;
 	virtual void mesh_setup()=0;
-	virtual void shdr_file_setup()=0;
+	inline void Load_Shaders(std::vector<shdr_vec> v)
+	{
+		for (shdr_vec shdr : v)
+		{
+			shdr_files.push_back(GLSLShader(shdr));
+		}
+	}
 
 	virtual void Update(double delta_time) = 0;
 
 	virtual void Render() = 0;
 
 	virtual void CleanUp() = 0;
+	//todo: cleanup deleted for now.
 	//{
 	//	for (Mesh* mesh : meshes)
 	//	{
@@ -44,6 +52,34 @@ public:
 	//		delete mesh;
 	//	}
 	//}
+	inline void Parse_Section(std::vector<std::vector<std::string>>& sections, std::string filepath, unsigned int size)
+	{
+		sections.resize(size);
+
+		//pushback sections[0]~[5]
+		for (int i{ 0 }; i < size; i++)
+		{
+			std::ifstream inFile(filepath + std::to_string(i + 1) + ".txt");
+			if (inFile.is_open() == false)
+			{
+				//throw std::runtime_error("Failed to load Section" + std::to_string(i));
+				continue;
+			}
+
+			std::string label;
+			while (inFile.eof() == false)
+			{
+				getline(inFile, label);
+				if (label.empty() || std::string(label.end() - 4, label.end()) != ".obj")
+				{
+					//throw std::runtime_error("Bad Filetype.  " + label + " not a .obj file");
+					continue;
+				}
+
+				sections[i].push_back(label);
+			}
+		}
+	}
 
 protected:
 
@@ -52,9 +88,13 @@ protected:
 	//Vec3 lightPos{ -5.f, 3.f, 5.f };
 
 	Vec3 cam_pos{ 0.f,0.f,0.f };
-	Vec2 Z_near_far{ 0.1f, 10000000.f };
 
+	//todo: set Near plane far away to make better depth buffer precision
+	Vec2 Z_near_far{ 10000.f, 10000000.f };
+
+	//todo: GLSLShader*?
 	std::vector<GLSLShader> shdr_files;
+	//todo: vector of Models? -> new Model()
 
 	Camera* camera{ nullptr };
 };

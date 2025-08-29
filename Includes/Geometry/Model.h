@@ -19,18 +19,27 @@ Creation date: 09.17.2022
 
 using shdr_vec = std::vector<std::pair<GLenum, std::string>>;
 
+
+struct aiNode;
+struct aiScene;
+struct aiMesh;
+
 class Engine_API Model
 {
 public:
 
-    Model(Vec3 pos = { 0.f,0.f,0.f }, Vec3 s = { 1.f,1.f,1.f }, Vec3 rot = { 0.f,0.f,0.f }, Vec4 col = { 0.f,0.f,0.f,1.f });
-    void init(Mesh* m, shdr_vec& shdr_files);
-    void update(double dt, Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolor, Vec3& eye);
-    void draw(bool show_fnormal = { false }, bool show_vnormal = { false });
-    //void draw_orbit();
-    void cleanup();
+    Model() {};
+    void Init(Mesh* m, GLSLShader& shader);
 
-    void set_color(Vec4 color) 
+    //Assimp reader
+    void Load_Assimp(const std::string& path);
+
+    void Update(Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolor, Vec3& eye);
+    void Draw(bool show_fnormal = { false }, bool show_vnormal = { false });
+    //void draw_orbit();
+    void CleanUp();
+
+    inline void set_color(Vec4 color)
     { 
         if (color.r > 1.f) { color.r = 1.f; }
         if (color.g > 1.f) { color.g = 1.f; }
@@ -40,26 +49,34 @@ public:
         is_updated = true;
     }
 
-    void set_position(Vec3 pos)
+    inline void set_position(Vec3 pos)
     {
         position = pos;
         is_updated = true;
     }
-    void set_scale(Vec3 s)
+    inline void set_scale(Vec3 s)
     {
         scale = s;
         is_updated = true;
     }
-    void set_rotation(Vec3 angle)
+    inline void set_rotation(Vec3 angle)
     {
         rotation = angle;
         is_updated = true;
     }
 
-    Vec3& Get_position() { return position; }
-    Vec3& Get_scale() { return scale; }
-    Vec3& Get_Rotation() { return rotation; }
-    GLSLShader GetShdr_pgm() { return shdr_pgm; };
+    inline Vec3& Get_position() { return position; }
+    inline Vec3& Get_scale() { return scale; }
+    inline Vec3& Get_Rotation() { return rotation; }
+    inline GLSLShader GetShdr_pgm() { return shdr_pgm; }
+    inline void SetShdr_pgm(GLSLShader& shdr) { shdr_pgm = shdr; shdr_handle = shdr.GetHandle(); }
+    inline void Set_mapping(bool do_map) { do_mapping = do_map; }
+
+private:
+    //Assimp helper functions ======================================
+    void processNode(aiNode* node, const aiScene* scene);
+    Mesh* processMesh(aiMesh* mesh, const aiScene* scene);
+    //==============================================================
 
 private:
     GLSLShader shdr_pgm;
@@ -72,7 +89,10 @@ private:
     glm::mat4 model{ glm::mat4(1.f) };
 
     bool is_updated{ false };
+    bool do_mapping{ false };
 	
-    Mesh* mesh;
-    //std::vector<Mesh*> meshes;
+    //Mesh* mesh{ nullptr };
+    std::vector<Mesh*> meshes;
+    std::vector<Texture*> textures;
+    std::string directory;
 };

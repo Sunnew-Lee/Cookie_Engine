@@ -29,10 +29,22 @@ Creation date: 09.17.2022
 #include <map>
 #include "../Shader/glslShader.h"
 
+//todo: hmm... not using Texture for now.
+struct Engine_API Texture {
+    unsigned int id{ 0 };
+    std::string type;
+    std::string path;
+};
+
 struct Engine_API Mesh
 {
     Mesh() {};
+
+    //for procedural mesh creation
     Mesh(std::string path);
+
+    //for Assimp return. Make Mesh out of all the data Assimp parsed.
+    Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures, float minmax[3][2], std::vector<Vec3>& fnbuffer);
 
     void SendVertexData();
     void UpdateVertexData();
@@ -46,7 +58,7 @@ struct Engine_API Mesh
     void OBJ_Parser(const std::filesystem::path& fileName);
 
     // set Model Translate, Scale, mapping from AABB data
-    //void vert_mapping(float (*xyz_minmax)[2]);
+    void vert_mapping(float xyz_minmax[3][2]);
 
     // make vert normals out of face normals.
     void calc_vert_normal();
@@ -63,7 +75,7 @@ struct Engine_API Mesh
     void LineVertexData();
 
 
-    /*glm::mat4 Get_mapping(void)
+    glm::mat4 Get_mapping(void)
     {
         return mapping;
     }
@@ -74,11 +86,12 @@ struct Engine_API Mesh
     glm::mat4 Get_OBJ_Scale(void)
     {
         return MODEL_Scale;
-    }*/
+    }
 
     /*  Storing the actual vertex/index data */
     std::vector<Vertex> vertexBuffer;
-    std::vector<GLint> indexBuffer;  // note that we start from 0
+    std::vector<unsigned int> indexBuffer;  // note that we start from 0 (GLint)
+    std::vector<Texture*> textureBuffer; // not using it for now
 
     std::map<int, std::vector<glm::vec3>> faces;
 
@@ -93,7 +106,7 @@ struct Engine_API Mesh
     GLuint VAO = 0;
     GLuint EBO = 0;
 
-    //glm::mat4 mapping{ glm::mat4(1.f) };
-    /*glm::mat4 MODEL_Translate{ glm::mat4(1.f) };
-    glm::mat4 MODEL_Scale{ glm::mat4(1.f) };*/
+    glm::mat4 mapping{ glm::mat4(1.f) };
+    glm::mat4 MODEL_Translate{ glm::mat4(1.f) };
+    glm::mat4 MODEL_Scale{ glm::mat4(1.f) };
 };

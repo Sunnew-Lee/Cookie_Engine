@@ -15,30 +15,44 @@ Creation date: 09.17.2022
 
 Mesh::Mesh(std::string path)
 {
+    // parse + mapping
     OBJ_Parser(path);
     calc_BufferDatas();
     SendVertexData();
 }
 
-//void Mesh::vert_mapping(float(*xyz_minmax)[2])
-//{
-//    float W = xyz_minmax[0][1] - xyz_minmax[0][0];  //x width
-//    float H = xyz_minmax[1][1] - xyz_minmax[1][0];  //y height
-//    float D = xyz_minmax[2][1] - xyz_minmax[2][0];  //z depth
-//
-//    glm::vec3 center{ glm::vec3((xyz_minmax[0][0] + xyz_minmax[0][1]),(xyz_minmax[1][0] + xyz_minmax[1][1]),(xyz_minmax[2][0] + xyz_minmax[2][1])) };
-//    center *= 0.5f;
-//
-//    glm::mat4 T = glm::mat4(1.0f);
-//    glm::mat4 S = glm::mat4(1.0f);
-//
-//    float scale_factor = std::max({ W, H, D });
-//
-//    MODEL_Translate = glm::translate(glm::mat4(1.0f), -center);
-//    MODEL_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
-//
-//    mapping = MODEL_Scale * MODEL_Translate;
-//}
+//todo: calc_BufferDatas(); SendVertexData(); do in Mesh::Init? Model Init=> Meshes->Init();?
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures, float minmax[3][2], std::vector<Vec3>& fnbuffer) :
+    vertexBuffer(vertices), indexBuffer(indices), textureBuffer(textures), fnBuffer(fnbuffer)
+{
+    vert_mapping(minmax);
+    // now that we have all the required data, set the vertex buffers and its attribute pointers.
+    calc_BufferDatas();
+    //uv_Sphere();  -> texture wrap
+    //Setup();
+    SendVertexData();
+}
+
+void Mesh::vert_mapping(float xyz_minmax[3][2])
+{
+    float W = xyz_minmax[0][1] - xyz_minmax[0][0];  //x width
+    float H = xyz_minmax[1][1] - xyz_minmax[1][0];  //y height
+    float D = xyz_minmax[2][1] - xyz_minmax[2][0];  //z depth
+
+    glm::vec3 center{ glm::vec3((xyz_minmax[0][0] + xyz_minmax[0][1]),(xyz_minmax[1][0] + xyz_minmax[1][1]),(xyz_minmax[2][0] + xyz_minmax[2][1])) };
+    center *= 0.5f;
+
+    glm::mat4 T = glm::mat4(1.0f);
+    glm::mat4 S = glm::mat4(1.0f);
+
+    float scale_factor = std::max({ W, H, D });
+
+    MODEL_Translate = glm::translate(glm::mat4(1.0f), -center);
+    MODEL_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
+
+    //todo: dont use mapping for Power Plant. maybe seperate shdr?
+    mapping = MODEL_Scale * MODEL_Translate;
+}
 
 void Mesh::calc_vert_normal()
 {
@@ -77,16 +91,16 @@ void Mesh::SendVertexData()
     glEnableVertexAttribArray(2);
     glVertexAttribPointer(2, 2, GL_FLOAT, GL_FALSE, sizeof(Vertex), reinterpret_cast<void*>(offsetof(Vertex, uv)));
 
+    // Mesh face normal
     glBindBuffer(GL_ARRAY_BUFFER, VBO[1]);
-    /*  Copy vertex attributes to GPU */
     glBufferData(GL_ARRAY_BUFFER, fnBuffer.size() * sizeof(glm::vec3), &fnBuffer[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
     glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, sizeof(glm::vec3), (void*)(0));
 
 
+    // Mesh vertex normal
     glBindBuffer(GL_ARRAY_BUFFER, VBO[2]);
-    /*  Copy vertex attributes to GPU */
     glBufferData(GL_ARRAY_BUFFER, vnBuffer.size() * sizeof(glm::vec3), &vnBuffer[0], GL_STATIC_DRAW);
 
     glEnableVertexAttribArray(0);
@@ -270,9 +284,8 @@ void Mesh::OBJ_Parser(const std::filesystem::path& fileName)
         }
     }
 
-    //vert_mapping(xyz_minmax);
+    vert_mapping(xyz_minmax);
     calc_vert_normal();
-
 }
 
 void Mesh::setup_mesh(GLSLShader& shdr)
@@ -398,14 +411,14 @@ bool Mesh::DegenerateTri(const glm::vec3& v0, const glm::vec3& v1, const glm::ve
         glm::distance(v2, v0) < EPSILON);
 }
 
-//todo: mapping delete
+//mapping for vn, fn lines
 void Mesh::calc_BufferDatas()
 {
     //calc vnBuffer
     for (Vertex& v : vertexBuffer)
     {
         vnBuffer.push_back(v.pos);
-        Vec4 temp = Vec4(glm::normalize(v.nrm), 1.f);// / MODEL_Scale;
+        Vec4 temp = Vec4(glm::normalize(v.nrm), 1.f) / MODEL_Scale;
 
         vnBuffer.push_back(v.pos + Vec3(temp) * LINE_SCALE);
     }
@@ -415,6 +428,6 @@ void Mesh::calc_BufferDatas()
     for (int i{ 1 }; i < size; i += 2)
     {
         Vec4 temp = Vec4(fnBuffer[i] - fnBuffer[i - 1], 1.f);
-        fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp/* / MODEL_Scale*/) * LINE_SCALE;
+        fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp /  MODEL_Scale) * LINE_SCALE;
     }
 }

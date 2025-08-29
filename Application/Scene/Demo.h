@@ -29,7 +29,7 @@ public:
 
 	virtual void Init(int w, int h, Camera* cam) override;
 	virtual void mesh_setup() override;
-	virtual void shdr_file_setup() override;
+	void shdr_file_setup();
 
 	virtual void Update(double delta_time) override;
 
@@ -39,7 +39,7 @@ public:
 
 private:
 	void Update_ImGui();
-	void Parse_Section();
+	//void Parse_Section();
 	std::vector<std::vector<std::string>> sections;
 private:
 	Vec3 lightPos{ -5.f, 3.f, 5.f };
