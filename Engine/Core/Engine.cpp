@@ -20,8 +20,8 @@ namespace Graphics
 		Engine_Init();
 
 		// Setup Camera
-		//camera = new Camera(Vec3(1338.f, 45000.f, 136532.f));	//todo: glm::vec3 is better than Math include?
-		camera = new Camera(Vec3(0.0f, 3.0f, 10.f));	//todo: glm::vec3 is better than Math include?
+		camera = new Camera(Vec3(0.f, 40000.f, 130000.f));	//todo: glm::vec3 is better than Math include?
+		//camera = new Camera(Vec3(0.0f, 3.0f, 10.f));	//for mapping
     }
 
     Engine::~Engine()
@@ -202,7 +202,6 @@ namespace Graphics
 			main_scene->CleanUp();
 		}
 		SafeDelete(main_scene);
-
 
 		SafeDelete(camera);
 

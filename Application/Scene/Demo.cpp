@@ -1,4 +1,4 @@
-#include "Demo.h"
+ï»¿#include "Demo.h"
 #include "../Camera/Camera.h"
 #include "../Shader/glslShader.h"
 
@@ -7,6 +7,19 @@
 //todo: where do we need to make camera?
 void Demo::Init(int width, int height, Camera* cam)
 {
+	//fill front and back face
+	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+
+	/*  Hidden surface removal */
+	//depth testing on
+	glEnable(GL_DEPTH_TEST);
+
+	// true if fragment's depth is smaller than cur depth
+	glDepthFunc(GL_LESS);
+	//glEdgeFlag(GL_FALSE);
+	//face culling
+	glEnable(GL_CULL_FACE);
+
 	camera = cam;
 
 	glViewport(0, 0, width, height);
@@ -16,31 +29,27 @@ void Demo::Init(int width, int height, Camera* cam)
 	shdr_file_setup();
 
 	mesh_setup();
-	Parse_Section(sections, "../3Dmodels/Section", 6);
+	//Power Plant Model has 4,5,6 sections.
+	Parse_Section(sections, "../3Dmodels/Section", 4);
 
 	//CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]);
 	//CenterOBJ.set_color({ 0.75f,0.45f,0.3f,1.f });
-	CenterOBJ.SetShdr_pgm(shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]);
+	PowerPlant.SetShdr_pgm(shdr_files[static_cast<int>(ShdrType::LINE)]);
 
 	//total 6 sections.
 	for (auto section : sections)
 	{
 		for (std::string& filepath : section)
 		{
-			CenterOBJ.Load_Assimp(filepath);
+			PowerPlant.Load_Assimp(filepath);
 		}
 	}
 
-	CenterOBJ.set_color({ 0.f,0.f,0.f,1.f });
-	CenterOBJ.Set_mapping(true);
+	//PowerPlant.Octree
 
-	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-	/*  Hidden surface removal */
-	glEnable(GL_DEPTH_TEST);
-	glDepthFunc(GL_LESS);
-
-	glEnable(GL_CULL_FACE);
+	//PowerPlant.set_color({ 0.f,0.f,0.f,1.f });
+	PowerPlant.set_color({ 0.8f,0.8f,0.9f,1.f });
+	PowerPlant.Set_mapping(false);
 }
 
 void Demo::Update(double delta_time)
@@ -50,20 +59,20 @@ void Demo::Update(double delta_time)
 	view = camera->GetViewMatrix();
 	cam_pos = camera->Position;
 
-	CenterOBJ.Update(view, projection, lightPos, lightColor, cam_pos);
+	PowerPlant.Update(view, projection, lightPos, lightColor, cam_pos);
 	//CenterOBJ.update(shaders[static_cast<int>(ShdrType::MODEL_PHONG)], view, projection, cam_pos, g, pl, m);
 }
 
 void Demo::Render()
 {
-	CenterOBJ.Draw(show_fnormal, show_vnormal);
+	PowerPlant.Draw(show_fnormal, show_vnormal);
 }
 
 void Demo::CleanUp()
 {
-	CenterOBJ.CleanUp();
+	// clean up using shader + meshes
+	PowerPlant.CleanUp();
 
-	// todo: Clean Meshes
 	//Scene::CleanUp();
 }
 
@@ -143,7 +152,7 @@ void Demo::mesh_setup()
 	*/
 }
 
-//sceneÀ¸·Î ³Ñ°Ü? ±×·³ vector<pair<string,string>>À¸·Î?
+//sceneÃ€Â¸Â·ÃŽ Â³Ã‘Â°Ãœ? Â±Ã—Â·Â³ vector<pair<string,string>>Ã€Â¸Â·ÃŽ?
 void Demo::shdr_file_setup()
 {
 	std::vector<shdr_vec> v;

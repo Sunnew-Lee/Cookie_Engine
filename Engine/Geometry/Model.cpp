@@ -32,7 +32,7 @@ void Model::Init(Mesh* m, GLSLShader& shader)
     //}
     //shdr_handle = shdr_pgm.GetHandle();
 
-    meshes[0]->setup_mesh(shdr_pgm);
+    //meshes[0]->setup_mesh(shdr_pgm);
 }
 
 //todo: all Section text needs to include "../3Dmodels/"
@@ -296,4 +296,14 @@ void Model::Draw(bool show_fnormal, bool show_vnormal)
 void Model::CleanUp()
 {
     shdr_pgm.DeleteShaderProgram();
+
+    for (Mesh* mesh : meshes)
+    {
+        SafeDelete(mesh);
+    }
+
+    for (Texture* texture : textures)
+    {
+        SafeDelete(texture);
+    }
 }

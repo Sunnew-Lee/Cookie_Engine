@@ -45,7 +45,7 @@ private:
 	Vec3 lightPos{ -5.f, 3.f, 5.f };
 	Vec3 lightColor{ 0.08f, 0.34f, 0.97f };
 
-	Model CenterOBJ;
+	Model PowerPlant;
 
 	bool show_fnormal{ false };
 	bool show_vnormal{ false };

@@ -44,7 +44,7 @@ public:
 	virtual void Render() = 0;
 
 	virtual void CleanUp() = 0;
-	//todo: cleanup deleted for now.
+	//todo: maybe clean all objects?
 	//{
 	//	for (Mesh* mesh : meshes)
 	//	{

@@ -16,10 +16,17 @@ enum class Camera_Movement {
     RIGHT
 };
 
-// Default camera values
+// Default camera values for mapping
+//const float YAW = -90.0f;
+//const float PITCH = -20.0f;
+//const float SPEED = 5.f;
+//const float SENSITIVITY = 70.f;
+//const float ZOOM = 45.0f;
+
+// Default camera values for Power Plant
 const float YAW = -90.0f;
-const float PITCH = -20.0f;
-const float SPEED = 5.f;
+const float PITCH = 0.f;
+const float SPEED = 30000.f;
 const float SENSITIVITY = 70.f;
 const float ZOOM = 45.0f;
 

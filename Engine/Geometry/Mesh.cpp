@@ -22,10 +22,11 @@ Mesh::Mesh(std::string path)
 }
 
 //todo: calc_BufferDatas(); SendVertexData(); do in Mesh::Init? Model Init=> Meshes->Init();?
+//for Assimp
 Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures, float minmax[3][2], std::vector<Vec3>& fnbuffer) :
-    vertexBuffer(vertices), indexBuffer(indices), textureBuffer(textures), fnBuffer(fnbuffer)
+    vertexBuffer(vertices), indexBuffer(indices), textureBuffer(textures), fnBuffer(fnbuffer), aabb(AABB(Vec3(minmax[0][0], minmax[1][0], minmax[2][0]), Vec3(minmax[0][1], minmax[1][1], minmax[2][1])))
 {
-    vert_mapping(minmax);
+    vert_mapping();
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
     calc_BufferDatas();
     //uv_Sphere();  -> texture wrap
@@ -33,24 +34,13 @@ Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, st
     SendVertexData();
 }
 
-void Mesh::vert_mapping(float xyz_minmax[3][2])
+void Mesh::vert_mapping()
 {
-    float W = xyz_minmax[0][1] - xyz_minmax[0][0];  //x width
-    float H = xyz_minmax[1][1] - xyz_minmax[1][0];  //y height
-    float D = xyz_minmax[2][1] - xyz_minmax[2][0];  //z depth
+    float scale_factor = std::max({ aabb.Width, aabb.Height, aabb.Depth });
 
-    glm::vec3 center{ glm::vec3((xyz_minmax[0][0] + xyz_minmax[0][1]),(xyz_minmax[1][0] + xyz_minmax[1][1]),(xyz_minmax[2][0] + xyz_minmax[2][1])) };
-    center *= 0.5f;
+    MODEL_Translate = glm::translate(glm::mat4(1.0f), -aabb.center);
+    MODEL_Scale = glm::scale(glm::mat4(1.0f), Vec3(2.f) / scale_factor);
 
-    glm::mat4 T = glm::mat4(1.0f);
-    glm::mat4 S = glm::mat4(1.0f);
-
-    float scale_factor = std::max({ W, H, D });
-
-    MODEL_Translate = glm::translate(glm::mat4(1.0f), -center);
-    MODEL_Scale = glm::scale(glm::mat4(1.0f), glm::vec3(2.f / scale_factor, 2.f / scale_factor, 2.f / scale_factor));
-
-    //todo: dont use mapping for Power Plant. maybe seperate shdr?
     mapping = MODEL_Scale * MODEL_Translate;
 }
 
@@ -284,38 +274,41 @@ void Mesh::OBJ_Parser(const std::filesystem::path& fileName)
         }
     }
 
-    vert_mapping(xyz_minmax);
+    //todo: pointer?
+    aabb = AABB(Vec3(xyz_minmax[0][0], xyz_minmax[1][0], xyz_minmax[2][0]), Vec3(xyz_minmax[0][1], xyz_minmax[1][1], xyz_minmax[2][1]));
+
+    vert_mapping();
     calc_vert_normal();
 }
 
-void Mesh::setup_mesh(GLSLShader& shdr)
-{
-    shdr.Use();
-
-    /*  Lets use map */
-    //modelLoc = glGetUniformLocation(renderProg.GetHandle(), "model");
-    //viewLoc = glGetUniformLocation(renderProg.GetHandle(), "view");
-    //colorLoc = glGetUniformLocation(renderProg.GetHandle(), "color");
-    //projectionLoc = glGetUniformLocation(renderProg.GetHandle(), "projection");
-    //LightLoc = glGetUniformLocation(renderProg.GetHandle(), "lightPos");
-    //ViewPosLoc = glGetUniformLocation(renderProg.GetHandle(), "viewPos");
-
-    //SendVertexData();
-
-    /*  Bind framebuffer to 0 to render to the screen (by default already 0) */
-    glBindFramebuffer(GL_FRAMEBUFFER, 0);
-
-    /*  Initially drawing using filled mode */
-    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
-
-    /*  Hidden surface removal */
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(GL_LESS);
-
-    glEnable(GL_CULL_FACE);     /*  For efficiency, not drawing back-face */
-
-    shdr.UnUse();
-}
+//void Mesh::setup_mesh(GLSLShader& shdr)
+//{
+//    shdr.Use();
+//
+//    /*  Lets use map */
+//    //modelLoc = glGetUniformLocation(renderProg.GetHandle(), "model");
+//    //viewLoc = glGetUniformLocation(renderProg.GetHandle(), "view");
+//    //colorLoc = glGetUniformLocation(renderProg.GetHandle(), "color");
+//    //projectionLoc = glGetUniformLocation(renderProg.GetHandle(), "projection");
+//    //LightLoc = glGetUniformLocation(renderProg.GetHandle(), "lightPos");
+//    //ViewPosLoc = glGetUniformLocation(renderProg.GetHandle(), "viewPos");
+//
+//    //SendVertexData();
+//
+//    /*  Bind framebuffer to 0 to render to the screen (by default already 0) */
+//    glBindFramebuffer(GL_FRAMEBUFFER, 0);
+//
+//    /*  Initially drawing using filled mode */
+//    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+//
+//    /*  Hidden surface removal */
+//    glEnable(GL_DEPTH_TEST);
+//    glDepthFunc(GL_LESS);
+//
+//    glEnable(GL_CULL_FACE);     /*  For efficiency, not drawing back-face */
+//
+//    shdr.UnUse();
+//}
 
 void Mesh::cleanup()
 {
@@ -430,4 +423,44 @@ void Mesh::calc_BufferDatas()
         Vec4 temp = Vec4(fnBuffer[i] - fnBuffer[i - 1], 1.f);
         fnBuffer[i] = fnBuffer[i - 1] + Vec3(temp /  MODEL_Scale) * LINE_SCALE;
     }
+}
+
+//todo: Set EBO and make index buffer for this.
+void AABB::SetLines()
+{
+    lines.push_back(min);  //min,min,min
+    lines.push_back(glm::vec3(min.x, min.y, max.z));  //min,min,max
+
+    lines.push_back(min);  //min,min,min
+    lines.push_back(glm::vec3(max.x, min.y, min.z));  //max,min,min
+
+    lines.push_back(glm::vec3(max.x, min.y, min.z));  //max,min,min
+    lines.push_back(glm::vec3(max.x, min.y, max.z));  //max,min,max
+
+    lines.push_back(glm::vec3(max.x, min.y, min.z));  //max,min,min
+    lines.push_back(glm::vec3(max.x, max.y, min.z));  //max,max,min
+
+    lines.push_back(glm::vec3(max.x, max.y, min.z));  //max,max,min
+    lines.push_back(max);  //max,max,max
+
+    lines.push_back(glm::vec3(max.x, max.y, min.z));  //max,max,min
+    lines.push_back(glm::vec3(min.x, max.y, min.z));  //min,max,min
+
+    lines.push_back(glm::vec3(min.x, max.y, min.z));  //min,max,min
+    lines.push_back(glm::vec3(min.x, max.y, max.z));  //min,max,max
+
+    lines.push_back(glm::vec3(min.x, max.y, min.z));  //min,max,min
+    lines.push_back(min);  //min,min,min
+
+    lines.push_back(max);  //max,max,max
+    lines.push_back(glm::vec3(max.x, min.y, max.z));  //max,min,max
+
+    lines.push_back(glm::vec3(max.x, min.y, max.z));  //max,min,max
+    lines.push_back(glm::vec3(min.x, min.y, max.z));  //min,min,max
+
+    lines.push_back(glm::vec3(min.x, min.y, max.z));  //min,min,max
+    lines.push_back(glm::vec3(min.x, max.y, max.z));  //min,max,max
+
+    lines.push_back(glm::vec3(min.x, max.y, max.z));  //min,max,max
+    lines.push_back(max);  //max,max,max
 }
