@@ -18,3 +18,6 @@ struct Engine_API Vertex
     glm::vec2 uv;
 
 };
+
+static constexpr float  EPSILON = 0.00001f;
+static constexpr float  LINE_SCALE = 0.125f;

@@ -23,8 +23,8 @@ Mesh::Mesh(std::string path)
 
 //todo: calc_BufferDatas(); SendVertexData(); do in Mesh::Init? Model Init=> Meshes->Init();?
 //for Assimp
-Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures, float minmax[3][2], std::vector<Vec3>& fnbuffer) :
-    vertexBuffer(vertices), indexBuffer(indices), textureBuffer(textures), fnBuffer(fnbuffer), aabb(AABB(Vec3(minmax[0][0], minmax[1][0], minmax[2][0]), Vec3(minmax[0][1], minmax[1][1], minmax[2][1])))
+Mesh::Mesh(std::vector<Vertex>& vertices, std::vector<unsigned int>& indices, std::vector<Texture*>& textures, AABB& _aabb, std::vector<Vec3>& fnbuffer) :
+    vertexBuffer(vertices), indexBuffer(indices), textureBuffer(textures), fnBuffer(fnbuffer), aabb(_aabb)
 {
     vert_mapping();
     // now that we have all the required data, set the vertex buffers and its attribute pointers.
@@ -310,7 +310,7 @@ void Mesh::OBJ_Parser(const std::filesystem::path& fileName)
 //    shdr.UnUse();
 //}
 
-void Mesh::cleanup()
+void Mesh::CleanUp()
 {
     glDeleteVertexArrays(1, &VAO);
     glDeleteBuffers(3, VBO);

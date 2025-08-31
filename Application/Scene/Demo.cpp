@@ -8,7 +8,7 @@
 void Demo::Init(int width, int height, Camera* cam)
 {
 	//fill front and back face
-	glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+	glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
 
 	/*  Hidden surface removal */
 	//depth testing on
@@ -34,7 +34,7 @@ void Demo::Init(int width, int height, Camera* cam)
 
 	//CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]);
 	//CenterOBJ.set_color({ 0.75f,0.45f,0.3f,1.f });
-	PowerPlant.SetShdr_pgm(shdr_files[static_cast<int>(ShdrType::LINE)]);
+	PowerPlant.SetShdr_pgm(shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]);
 
 	//total 6 sections.
 	for (auto section : sections)
@@ -45,16 +45,16 @@ void Demo::Init(int width, int height, Camera* cam)
 		}
 	}
 
-	//PowerPlant.Octree
+	PowerPlant.Octree_Setup(selected_criteria);
 
 	//PowerPlant.set_color({ 0.f,0.f,0.f,1.f });
-	PowerPlant.set_color({ 0.8f,0.8f,0.9f,1.f });
+	PowerPlant.set_color({ 0.3f,0.3f,0.3f,1.f });
 	PowerPlant.Set_mapping(false);
 }
 
 void Demo::Update(double delta_time)
 {
-	Update_ImGui();	
+	Update_ImGui();
 
 	view = camera->GetViewMatrix();
 	cam_pos = camera->Position;
@@ -65,7 +65,12 @@ void Demo::Update(double delta_time)
 
 void Demo::Render()
 {
-	PowerPlant.Draw(show_fnormal, show_vnormal);
+	if(show_Octree == false)
+		PowerPlant.Render(show_fnormal, show_vnormal);
+	else
+		PowerPlant.RenderOctree(shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)], show_AABB, show_AABB_Level);
+	//PowerPlant.RenderOctree(shdr_files[static_cast<int>(ShdrType::LINE)], false);
+	
 }
 
 void Demo::CleanUp()
@@ -79,24 +84,33 @@ void Demo::CleanUp()
 void Demo::Update_ImGui()
 {
 	ImGui::Begin("Scene");
-	//if (ImGui::Combo("Mesh", &selected_item, mesh_items, IM_ARRAYSIZE(mesh_items)))
-	//{
-	//	switch (selected_item)
-	//	{
-	//	case 0:CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-	//	case 1:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE4)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-	//	case 2:CenterOBJ.init(meshes[static_cast<int>(MeshType::CUBE2)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-	//	case 3:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-	//	case 4:CenterOBJ.init(meshes[static_cast<int>(MeshType::SPHERE_MOD)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
+	if (ImGui::Combo("Critaria", &selected_criteria, criteria_items, IM_ARRAYSIZE(criteria_items)))
+	{
+		PowerPlant.Octree_Setup(selected_criteria);
+	}
 
-	//	default: CenterOBJ.init(meshes[static_cast<int>(MeshType::BUNNY)], shdr_files[static_cast<int>(ShdrType::MODEL_PHONG)]); break;
-	//	}
-	//}
+	ImGui::Checkbox("Show Octree ", &show_Octree);
+	if (show_Octree)
+	{
+		ImGui::Checkbox("Show Octree AABB", &show_AABB);
+		if (show_AABB)
+		{
+			ImGui::Checkbox("Level 1", &show_AABB_Level[1]);
+			ImGui::Checkbox("Level 2", &show_AABB_Level[2]);
+			ImGui::Checkbox("Level 3", &show_AABB_Level[3]);
+			ImGui::Checkbox("Level 4", &show_AABB_Level[4]);
+			ImGui::Checkbox("Level 5", &show_AABB_Level[5]);
+			ImGui::Checkbox("Level 6", &show_AABB_Level[6]);
+			ImGui::Checkbox("Level 7", &show_AABB_Level[7]);
+			ImGui::Checkbox("Level 8", &show_AABB_Level[8]);
+		}
+	}
 
-	ImGui::Checkbox("Show face normal ", &show_fnormal);
-	ImGui::Checkbox("Show vertex normal", &show_vnormal);
+	//todo: remove for now
+	//ImGui::Checkbox("Show face normal ", &show_fnormal);
+	//ImGui::Checkbox("Show vertex normal", &show_vnormal);
 
-	ImGui::SliderFloat3("Light Position", &lightPos.x, -1000.f, 1000.f);
+	//ImGui::SliderFloat3("Light Position", &lightPos.x, -1000.f, 1000.f);
 	ImGui::End();
 }
 

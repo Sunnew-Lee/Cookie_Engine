@@ -16,9 +16,9 @@ Creation date: 09.17.2022
 #include "../Core/EngineCore.h"
 #include "../Math/Math.h"
 #include "Mesh.h"
+#include "../DataStructure/Octree.h"
 
 using shdr_vec = std::vector<std::pair<GLenum, std::string>>;
-
 
 struct aiNode;
 struct aiScene;
@@ -31,13 +31,20 @@ public:
     Model() {};
     void Init(Mesh* m, GLSLShader& shader);
 
+    //if using octree, setup.
+    void Octree_Setup(int selected_crit);
+
     //Assimp reader
     void Load_Assimp(const std::string& path);
 
     void Update(Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolor, Vec3& eye);
-    void Draw(bool show_fnormal = { false }, bool show_vnormal = { false });
+    void Render(bool show_fnormal = { false }, bool show_vnormal = { false });
+    void RenderOctree(GLSLShader& shader, bool& show_oct_aabb, bool* show_aabb_level);
+
     //void draw_orbit();
     void CleanUp();
+
+    void ExtendAABB(AABB& other);
 
     inline void set_color(Vec4 color)
     { 
@@ -95,4 +102,8 @@ private:
     std::vector<Mesh*> meshes;
     std::vector<Texture*> textures;
     std::string directory;
+
+
+    AABB* aabb{ nullptr };
+    Octree octree;
 };

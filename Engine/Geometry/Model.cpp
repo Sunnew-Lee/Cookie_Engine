@@ -202,7 +202,15 @@ Mesh* Model::processMesh(aiMesh* mesh, const aiScene* scene)
     //// return a mesh object created from the extracted mesh data
     //return Mesh(vertices, indices, textures);
 
-    return new Mesh(vertices, indices, textures, xyz_minmax, fnBuffer);
+    AABB temp = AABB(Vec3(xyz_minmax[0][0], xyz_minmax[1][0], xyz_minmax[2][0]), Vec3(xyz_minmax[0][1], xyz_minmax[1][1], xyz_minmax[2][1]));
+
+    // Big AABB for the whole model
+    if (aabb == nullptr)
+        aabb = new AABB(temp.min, temp.max);
+    else
+        ExtendAABB(temp);
+
+    return new Mesh(vertices, indices, textures, temp, fnBuffer);
 }
 
 
@@ -240,7 +248,7 @@ void Model::Update(Mat4& view, Mat4& projection, Vec3& lightpos, Vec3& lightcolo
 }
 
 
-void Model::Draw(bool show_fnormal, bool show_vnormal)
+void Model::Render(bool show_fnormal, bool show_vnormal)
 {
     shdr_pgm.Use();
 
@@ -280,6 +288,25 @@ void Model::Draw(bool show_fnormal, bool show_vnormal)
     shdr_pgm.UnUse();
 }
 
+void Model::RenderOctree(GLSLShader& shader, bool& show_oct_aabb, bool* show_aabb_level)
+{
+    shader.Use();
+    glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
+    glBindVertexArray(octree.TREE_VAO);
+    glBindBuffer(GL_ARRAY_BUFFER, octree.TREE_VBO);
+
+    octree.show_AABB = show_oct_aabb;
+    octree.show_AABB_Level = show_aabb_level;
+    //if (show_oct_aabb)
+    octree.Render_PreorderTraversal(shader, octree.octreeRoot);
+    //else
+    //    inorderTraversal_NoAABB(shader, Octree_root);
+
+    glBindVertexArray(0);
+    glPolygonMode(GL_FRONT_AND_BACK, GL_FILL);
+    shader.UnUse();
+}
+
 //void Model::draw_orbit()
 //{
 //    shdr_pgm.Use();
@@ -299,6 +326,7 @@ void Model::CleanUp()
 
     for (Mesh* mesh : meshes)
     {
+        mesh->CleanUp();
         SafeDelete(mesh);
     }
 
@@ -306,4 +334,41 @@ void Model::CleanUp()
     {
         SafeDelete(texture);
     }
+
+    //todo: octree cleanup
+    octree.CleanUp();
+}
+
+void Model::ExtendAABB(AABB& other)
+{
+    if (aabb == nullptr)
+    {
+        return;
+    }
+
+    //me vs other
+    for (int i{ 0 }; i < 3; i++)
+    {
+        if (aabb->min[i] > other.min[i])
+            aabb->min[i] = other.min[i];
+
+        if (aabb->max[i] < other.max[i])
+            aabb->max[i] = other.max[i];
+    }
+    aabb->center = glm::vec3((aabb->min[0] + aabb->max[0]), (aabb->min[1] + aabb->max[1]), (aabb->min[2] + aabb->max[2])) * 0.5f;
+}
+
+
+
+void Model::Octree_Setup(int selected_crit)
+{
+    //if (octree != nullptr)
+    //{
+    //    return;
+    //}
+
+    octree.criteria_level = selected_crit;
+    octree.Init(meshes, aabb);
+    aabb->SetLines();
+    octree.Build_Octree();    
 }
