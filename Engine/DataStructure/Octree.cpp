@@ -50,16 +50,13 @@ void Octree::Start_Recursion(Node* node)
 {
     if (node->triangles.size() <= criteria[criteria_level])
     {
-        //std::cout << node->triangles.size()<<'\n';
         return;
     }
-    //AABB* aabb = new AABB((first->bv->center + second->bv->center) * 0.5f);
+
     //divide this->AABB in to 8 pieces and assign to Children
-    //node->pChildren[0] = new OctreeNode(AABB, this->level + 1);
     glm::vec3 min = node->aabb->min;
     glm::vec3 max = node->aabb->max;
     glm::vec3 center = node->aabb->center;
-    //glm::vec3 halfsize = (max - min) * 0.5f;
 
     AABB* aabbs[8];
     aabbs[0] = new AABB(min, center);
@@ -115,15 +112,8 @@ void Octree::Start_Recursion(Node* node)
         // check which children this triangle needs to go
         DivideOrAdd(node, tri);
     }
-    //int size{ 0 };
-    //for (int i = 0; i < 8; i++)
-    //{
-    //    size += node->pChildren[i]->triangles.size();
-    //}
 
-    //todo: clear
     node->triangles.clear();
-    //node->triangles.shrink_to_fit(); // 메모리까지 확실히 반환
 
     for (int i = 0; i < 8; i++)
     {
