@@ -14,7 +14,7 @@ struct Engine_API Octree
 	void Start_Recursion(Node* node);
 	void DivideOrAdd(Node* node, Triangle tri);
 	bool Tri_check(const Triangle& tri, AABB* aabb);
-	std::pair<bool, std::vector<Triangle>> IntersectRayPlane(Node* node, int axisIndex, Triangle v);
+	std::pair<bool, std::vector<Triangle>> SplitTriangleByPlane(Node* node, int axisIndex, Triangle v);
 
 	void Render_PreorderTraversal(GLSLShader& shader, Node* root);
 

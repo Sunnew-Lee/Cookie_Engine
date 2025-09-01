@@ -147,7 +147,7 @@ void Octree::DivideOrAdd(Node* node, Triangle tri)
         {
             Triangle triangle = triangles_stack.top();
 
-            auto newTriangleInfo = IntersectRayPlane(node, i, triangle);
+            auto newTriangleInfo = SplitTriangleByPlane(node, i, triangle);
             bool did_divide = newTriangleInfo.first;
 
             if (did_divide == true)
@@ -203,7 +203,7 @@ bool Octree::Tri_check(const Triangle& tri, AABB* aabb)
     return true;
 }
 
-std::pair<bool, std::vector<Triangle>> Octree::IntersectRayPlane(Node* node, int axisIndex, Triangle tri)
+std::pair<bool, std::vector<Triangle>> Octree::SplitTriangleByPlane(Node* node, int axisIndex, Triangle tri)
 {
     std::vector<Triangle> resultT;
     glm::vec3 normal;
